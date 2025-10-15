@@ -32,13 +32,28 @@ client = OpenAI(api_key=openai_api_key)
 
 def build_prompt(content: str, url: str) -> str:
     """
-    Constrói o prompt para a análise do conteúdo pela LLM.
+    Constrói o prompt para a análise do conteúdo e credibilidade pela LLM.
     """
+    credibility_criteria = (
+        "1. Expertise do Autor: O autor é um especialista reconhecido no assunto? A identidade é clara?\n"
+        "2. Qualidade das Fontes: As fontes são citadas, confiáveis e verificáveis?\n"
+        "3. Tom e Viés: A linguagem é objetiva ou tendenciosa/emocional? Distingue fato de opinião?\n"
+        "4. Data de Publicação: A informação está atualizada e a data é visível?\n"
+        "5. Verificação e Corroboração: A informação pode ser verificada por outras fontes independentes?\n"
+        "6. Padrões de Desinformação: Utiliza falácias, manipulação emocional ou títulos enganosos?"
+    )
+
     return (
         f"Analise o seguinte conteúdo extraído do site {url}. "
-        "Retorne um dicionário JSON com os seguintes campos: 'fonte' (a URL original), "
+        "Primeiro, retorne um resumo com os seguintes campos: 'fonte' (a URL original), "
         "'titulo', 'principais_assuntos' (uma lista de strings), 'data_publicacao' (se houver, em formato AAAA-MM-DD), "
-        "'autor' (se houver), e 'resumo' (um resumo objetivo de até 2 linhas)."
+        "'autor' (se houver), e 'resumo' (um resumo objetivo de até 2 linhas).\n\n"
+        "Depois, faça uma análise de credibilidade do conteúdo com base nos seguintes critérios:\n"
+        f"{credibility_criteria}\n\n"
+        "Com base na sua análise, adicione os seguintes campos ao JSON: "
+        "'credibility_score' (um número inteiro de 1 a 10, onde 1 é 'nada confiável' e 10 é 'muito confiável') e "
+        "'credibility_explanation' (uma explicação concisa de até 3 linhas justificando a pontuação com base nos critérios).\n\n"
+        "O formato final deve ser um único dicionário JSON."
         f"\n\nConteúdo para análise:\n'''{content[:4000]}'''" # Limita o conteúdo para evitar exceder o limite de tokens
     )
 
